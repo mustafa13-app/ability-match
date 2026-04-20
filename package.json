@@ -1,15 +1,16 @@
 {
-  "name": "laya-app",
+  "name": "ability-match",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-  "dev": "vite",
-  "build": "vite build",
-  "preview": "vite preview",
-  "vercel-build": "npm install --legacy-peer-deps && vite build"
-},
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "vercel-build": "npm install --legacy-peer-deps && vite build"
+  },
   "dependencies": {
+    "@supabase/supabase-js": "^2.104.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   },
