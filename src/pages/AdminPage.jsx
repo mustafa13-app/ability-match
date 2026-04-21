@@ -6,9 +6,9 @@ function AdminPage({ goHome, candidates, jobs }) {
       <h2>Candidates</h2>
       {candidates.length === 0 && <p>No candidates yet</p>}
 
-      {candidates.map((c, index) => (
+      {candidates.map((c) => (
         <div
-          key={index}
+          key={c.id}
           style={{
             marginBottom: '20px',
             padding: '10px',
@@ -27,9 +27,9 @@ function AdminPage({ goHome, candidates, jobs }) {
       <h2>Jobs</h2>
       {jobs.length === 0 && <p>No jobs yet</p>}
 
-      {jobs.map((j, index) => (
+      {jobs.map((j) => (
         <div
-          key={index}
+          key={j.id}
           style={{
             marginBottom: '20px',
             padding: '10px',
@@ -43,17 +43,6 @@ function AdminPage({ goHome, candidates, jobs }) {
           <p>Location: {j.location}</p>
         </div>
       ))}
-
-      <button
-        style={{ marginTop: '20px', background: 'red', color: 'white' }}
-        onClick={() => {
-          localStorage.removeItem('candidates')
-          localStorage.removeItem('jobs')
-          window.location.reload()
-        }}
-      >
-        Reset Data
-      </button>
 
       <br />
       <br />

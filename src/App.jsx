@@ -6,68 +6,74 @@ import CandidatePage from './pages/CandidatePage'
 import EmployerPage from './pages/EmployerPage'
 import AdminPage from './pages/AdminPage'
 import MatchesPage from './pages/MatchesPage'
+import { supabase } from './lib/supabase'
 
 function App() {
   const [page, setPage] = useState('home')
-
-  const [candidates, setCandidates] = useState(() => {
-    try {
-      const saved = localStorage.getItem('candidates')
-      const parsed = saved ? JSON.parse(saved) : []
-      return Array.isArray(parsed) ? parsed : []
-    } catch (error) {
-      console.error('Error loading candidates from localStorage:', error)
-      return []
-    }
-  })
-
-  const [jobs, setJobs] = useState(() => {
-    try {
-      const saved = localStorage.getItem('jobs')
-      const parsed = saved ? JSON.parse(saved) : []
-      return Array.isArray(parsed) ? parsed : []
-    } catch (error) {
-      console.error('Error loading jobs from localStorage:', error)
-      return []
-    }
-  })
+  const [candidates, setCandidates] = useState([])
+  const [jobs, setJobs] = useState([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    try {
-      localStorage.setItem('candidates', JSON.stringify(candidates))
-    } catch (error) {
-      console.error('Error saving candidates to localStorage:', error)
-    }
-  }, [candidates])
+    loadData()
+  }, [])
 
-  useEffect(() => {
-    try {
-      localStorage.setItem('jobs', JSON.stringify(jobs))
-    } catch (error) {
-      console.error('Error saving jobs to localStorage:', error)
-    }
-  }, [jobs])
+  const loadData = async () => {
+    setLoading(true)
 
-  const addCandidate = (candidate) => {
-    const candidateWithId = {
-      id: crypto.randomUUID(),
-      ...candidate,
-      createdAt: new Date().toISOString(),
+    const [{ data: candidateData, error: candidateError }, { data: jobData, error: jobError }] =
+      await Promise.all([
+        supabase.from('candidates').select('*').order('created_at', { ascending: false }),
+        supabase.from('jobs').select('*').order('created_at', { ascending: false }),
+      ])
+
+    if (candidateError) {
+      console.error('Error loading candidates:', candidateError)
+    } else {
+      setCandidates(candidateData || [])
     }
 
-    setCandidates((prev) => [...prev, candidateWithId])
+    if (jobError) {
+      console.error('Error loading jobs:', jobError)
+    } else {
+      setJobs(jobData || [])
+    }
+
+    setLoading(false)
+  }
+
+  const addCandidate = async (candidate) => {
+    const { error } = await supabase.from('candidates').insert([candidate])
+
+    if (error) {
+      console.error('Error adding candidate:', error)
+      alert('Failed to save candidate')
+      return
+    }
+
+    await loadData()
     setPage('admin')
   }
 
-  const addJob = (job) => {
-    const jobWithId = {
-      id: crypto.randomUUID(),
-      ...job,
-      createdAt: new Date().toISOString(),
+  const addJob = async (job) => {
+    const { error } = await supabase.from('jobs').insert([job])
+
+    if (error) {
+      console.error('Error adding job:', error)
+      alert('Failed to save job')
+      return
     }
 
-    setJobs((prev) => [...prev, jobWithId])
+    await loadData()
     setPage('admin')
+  }
+
+  if (loading) {
+    return (
+      <div className="page">
+        <h1>Loading...</h1>
+      </div>
+    )
   }
 
   switch (page) {
@@ -93,7 +99,6 @@ function App() {
           goHome={() => setPage('home')}
           candidates={candidates}
           jobs={jobs}
-          goTo={setPage}
         />
       )
 
