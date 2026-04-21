@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 
 import HomePage from './pages/HomePage'
@@ -9,10 +9,12 @@ import MatchesPage from './pages/MatchesPage'
 
 function App() {
   const [page, setPage] = useState('home')
+
   const [candidates, setCandidates] = useState(() => {
     try {
       const saved = localStorage.getItem('candidates')
-      return saved ? JSON.parse(saved) : []
+      const parsed = saved ? JSON.parse(saved) : []
+      return Array.isArray(parsed) ? parsed : []
     } catch (error) {
       console.error('Error loading candidates from localStorage:', error)
       return []
@@ -22,7 +24,8 @@ function App() {
   const [jobs, setJobs] = useState(() => {
     try {
       const saved = localStorage.getItem('jobs')
-      return saved ? JSON.parse(saved) : []
+      const parsed = saved ? JSON.parse(saved) : []
+      return Array.isArray(parsed) ? parsed : []
     } catch (error) {
       console.error('Error loading jobs from localStorage:', error)
       return []
@@ -46,54 +49,67 @@ function App() {
   }, [jobs])
 
   const addCandidate = (candidate) => {
-    setCandidates((prev) => [...prev, candidate])
+    const candidateWithId = {
+      id: crypto.randomUUID(),
+      ...candidate,
+      createdAt: new Date().toISOString(),
+    }
+
+    setCandidates((prev) => [...prev, candidateWithId])
     setPage('admin')
   }
 
   const addJob = (job) => {
-    setJobs((prev) => [...prev, job])
+    const jobWithId = {
+      id: crypto.randomUUID(),
+      ...job,
+      createdAt: new Date().toISOString(),
+    }
+
+    setJobs((prev) => [...prev, jobWithId])
     setPage('admin')
   }
 
-  if (page === 'candidate') {
-    return (
-      <CandidatePage
-        goHome={() => setPage('home')}
-        onSubmitCandidate={addCandidate}
-      />
-    )
-  }
+  switch (page) {
+    case 'candidate':
+      return (
+        <CandidatePage
+          goHome={() => setPage('home')}
+          onSubmitCandidate={addCandidate}
+        />
+      )
 
-  if (page === 'employer') {
-    return (
-      <EmployerPage
-        goHome={() => setPage('home')}
-        onSubmitJob={addJob}
-      />
-    )
-  }
+    case 'employer':
+      return (
+        <EmployerPage
+          goHome={() => setPage('home')}
+          onSubmitJob={addJob}
+        />
+      )
 
-  if (page === 'admin') {
-    return (
-      <AdminPage
-        goHome={() => setPage('home')}
-        candidates={candidates}
-        jobs={jobs}
-      />
-    )
-  }
+    case 'admin':
+      return (
+        <AdminPage
+          goHome={() => setPage('home')}
+          candidates={candidates}
+          jobs={jobs}
+          goTo={setPage}
+        />
+      )
 
-  if (page === 'matches') {
-    return (
-      <MatchesPage
-        goHome={() => setPage('home')}
-        candidates={candidates}
-        jobs={jobs}
-      />
-    )
-  }
+    case 'matches':
+      return (
+        <MatchesPage
+          goHome={() => setPage('home')}
+          candidates={candidates}
+          jobs={jobs}
+        />
+      )
 
-  return <HomePage goTo={setPage} />
+    case 'home':
+    default:
+      return <HomePage goTo={setPage} />
+  }
 }
 
 export default App
