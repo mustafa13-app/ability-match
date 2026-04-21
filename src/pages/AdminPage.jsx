@@ -21,6 +21,16 @@ function AdminPage({ goHome, candidates, jobs }) {
           <p>Skills: {c.skills}</p>
           <p>Experience: {c.experience}</p>
           <p>Location: {c.location}</p>
+          <p>Work Mode: {c.work_mode}</p>
+          <p>Notes: {c.notes || 'None'}</p>
+
+          {c.cv_url && (
+            <p>
+              <a href={c.cv_url} target="_blank" rel="noopener noreferrer">
+                View CV
+              </a>
+            </p>
+          )}
         </div>
       ))}
 
@@ -39,8 +49,11 @@ function AdminPage({ goHome, candidates, jobs }) {
         >
           <strong>{j.title}</strong>
           <p>Company: {j.company}</p>
-          <p>Skills: {j.requiredSkills}</p>
+          <p>Skills: {j.requiredSkills || j.required_skills}</p>
           <p>Location: {j.location}</p>
+          <p>Work Mode: {j.work_mode || j.workMode}</p>
+          <p>Experience: {j.experience}</p>
+          <p>Description: {j.description || 'None'}</p>
         </div>
       ))}
 

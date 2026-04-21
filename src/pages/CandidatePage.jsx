@@ -12,6 +12,9 @@ function CandidatePage({ goHome, onSubmitCandidate }) {
     notes: ''
   })
 
+  const [cvFile, setCvFile] = useState(null)
+  const [submitting, setSubmitting] = useState(false)
+
   const handleChange = (e) => {
     setForm({
       ...form,
@@ -19,28 +22,58 @@ function CandidatePage({ goHome, onSubmitCandidate }) {
     })
   }
 
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0] || null
+    setCvFile(file)
+  }
+
+  const uploadCv = async () => {
+    if (!cvFile) return null
+
+    const fileExt = cvFile.name.split('.').pop()
+    const fileName = `${Date.now()}-${form.name || 'candidate'}.${fileExt}`
+    const filePath = fileName
+
+    const { error: uploadError } = await supabase.storage
+      .from('cvs')
+      .upload(filePath, cvFile, {
+        upsert: false
+      })
+
+    if (uploadError) {
+      throw uploadError
+    }
+
+    const { data } = supabase.storage.from('cvs').getPublicUrl(filePath)
+
+    return data.publicUrl
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setSubmitting(true)
 
-    const candidateToSave = {
-      name: form.name,
-      email: form.email,
-      skills: form.skills,
-      experience: parseInt(form.experience || 0),
-      location: form.location,
-      work_mode: form.workMode,
-      notes: form.notes
-    }
+    try {
+      const cvUrl = await uploadCv()
 
-    const { error } = await supabase.from('candidates').insert([candidateToSave])
+      const candidateToSave = {
+        name: form.name,
+        email: form.email,
+        skills: form.skills,
+        experience: parseInt(form.experience || 0),
+        location: form.location,
+        work_mode: form.workMode,
+        notes: form.notes,
+        cv_url: cvUrl
+      }
 
-    if (error) {
+      await onSubmitCandidate(candidateToSave)
+    } catch (error) {
       console.error('Error saving candidate:', error)
       alert('Failed to save candidate')
-      return
+    } finally {
+      setSubmitting(false)
     }
-
-    onSubmitCandidate(form)
   }
 
   return (
@@ -48,22 +81,66 @@ function CandidatePage({ goHome, onSubmitCandidate }) {
       <h1>Candidate Form</h1>
 
       <form onSubmit={handleSubmit}>
-        <input name="name" placeholder="Full Name" onChange={handleChange} />
-        <input name="email" placeholder="Email" onChange={handleChange} />
-        <input name="skills" placeholder="Skills (comma separated)" onChange={handleChange} />
-        <input name="experience" placeholder="Years of Experience" onChange={handleChange} />
-        <input name="location" placeholder="Location" onChange={handleChange} />
-        <input name="workMode" placeholder="Remote / Hybrid / Onsite" onChange={handleChange} />
+        <input
+          name="name"
+          placeholder="Full Name"
+          value={form.name}
+          onChange={handleChange}
+          required
+        />
+        <input
+          name="email"
+          placeholder="Email"
+          value={form.email}
+          onChange={handleChange}
+          required
+        />
+        <input
+          name="skills"
+          placeholder="Skills (comma separated)"
+          value={form.skills}
+          onChange={handleChange}
+        />
+        <input
+          name="experience"
+          placeholder="Years of Experience"
+          value={form.experience}
+          onChange={handleChange}
+        />
+        <input
+          name="location"
+          placeholder="Location"
+          value={form.location}
+          onChange={handleChange}
+        />
+        <input
+          name="workMode"
+          placeholder="Remote / Hybrid / Onsite"
+          value={form.workMode}
+          onChange={handleChange}
+        />
         <textarea
           name="notes"
           placeholder="Accessibility needs (optional)"
+          value={form.notes}
           onChange={handleChange}
         />
 
-        <button type="submit">Submit</button>
+        <label style={{ display: 'block', marginTop: '12px', marginBottom: '6px' }}>
+          Upload CV
+        </label>
+        <input
+          type="file"
+          accept=".pdf,.doc,.docx"
+          onChange={handleFileChange}
+        />
+
+        <button type="submit" disabled={submitting}>
+          {submitting ? 'Submitting...' : 'Submit'}
+        </button>
       </form>
 
-      <button className="secondary" onClick={goHome}>
+      <button className="secondary" onClick={goHome} disabled={submitting}>
         Back Home
       </button>
     </div>
