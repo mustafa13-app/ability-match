@@ -1,50 +1,12 @@
-function normalizeList(value) {
-  return value
-    .split(',')
-    .map((item) => item.trim().toLowerCase())
-    .filter(Boolean)
-}
-
-export function getMatches(candidates, jobs) {
+export function getMatches(candidates = [], jobs = []) {
   return jobs.map((job) => {
-    const requiredSkills = normalizeList(job.requiredSkills || '')
-    const jobWorkMode = (job.workMode || '').toLowerCase()
-    const jobExperience = parseInt(job.experience || 0)
-
     const rankedCandidates = candidates.map((candidate) => {
-      const candidateSkills = normalizeList(candidate.skills || '')
-      const candidateWorkMode = (candidate.workMode || '').toLowerCase()
-      const candidateExperience = parseInt(candidate.experience || 0)
-
-      // Skill match
-      const matchedSkills = requiredSkills.filter((skill) =>
-        candidateSkills.includes(skill)
-      )
-
-      const skillScore =
-        requiredSkills.length === 0
-          ? 0
-          : (matchedSkills.length / requiredSkills.length) * 100
-
-      // Work mode match
-      const workModeScore =
-        jobWorkMode && candidateWorkMode === jobWorkMode ? 100 : 0
-
-      // Experience match (simple)
-      const experienceScore =
-        candidateExperience >= jobExperience ? 100 : 50
-
-      // Final weighted score
-      const finalScore = Math.round(
-        skillScore * 0.6 +
-        workModeScore * 0.2 +
-        experienceScore * 0.2
-      )
+      const result = calculateMatch(candidate, job)
 
       return {
         candidate,
-        score: finalScore,
-        explanation: `${matchedSkills.length}/${requiredSkills.length} skills • ${candidateExperience} yrs exp • ${candidateWorkMode}`
+        score: result.score,
+        explanation: `${result.matchingSkills}/${result.totalSkills} skills matched`,
       }
     })
 
@@ -52,7 +14,50 @@ export function getMatches(candidates, jobs) {
 
     return {
       job,
-      candidates: rankedCandidates
+      candidates: rankedCandidates,
     }
   })
+}
+
+function calculateMatch(candidate, job) {
+  const candidateSkills = normalizeSkills(candidate.skills)
+
+  const jobSkills = normalizeSkills(
+    job.requiredSkills || job.required_skills || ''
+  )
+
+  const candidateExperience = Number(candidate.experience || 0)
+  const jobExperience = Number(job.experience || job.minExperience || 0)
+
+  const matching = jobSkills.filter((skill) =>
+    candidateSkills.includes(skill)
+  )
+
+  const skillScore =
+    jobSkills.length > 0 ? matching.length / jobSkills.length : 0
+
+  let experienceScore = 1
+  if (jobExperience > 0) {
+    experienceScore = Math.min(candidateExperience / jobExperience, 1)
+  }
+
+  const finalScore = Math.round(
+    (skillScore * 0.7 + experienceScore * 0.3) * 100
+  )
+
+  return {
+    score: finalScore,
+    matchingSkills: matching.length,
+    totalSkills: jobSkills.length,
+  }
+}
+
+function normalizeSkills(skills) {
+  if (!skills || typeof skills !== 'string') return []
+
+  return skills
+    .toLowerCase()
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
 }

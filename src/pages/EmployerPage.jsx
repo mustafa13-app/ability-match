@@ -1,19 +1,17 @@
 import { useState } from 'react'
-import { supabase } from '../lib/supabase'
 
 function EmployerPage({ goHome, onSubmitJob }) {
   const [form, setForm] = useState({
-    company: '',
-    contact: '',
-    email: '',
     title: '',
-    description: '',
+    company: '',
     requiredSkills: '',
-    preferredSkills: '',
+    experience: '',
     location: '',
     workMode: '',
-    experience: ''
+    description: ''
   })
+
+  const [submitting, setSubmitting] = useState(false)
 
   const handleChange = (e) => {
     setForm({
@@ -24,53 +22,146 @@ function EmployerPage({ goHome, onSubmitJob }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setSubmitting(true)
 
-    const jobToSave = {
-      company: form.company,
-      contact: form.contact,
-      email: form.email,
-      title: form.title,
-      description: form.description,
-      required_skills: form.requiredSkills,
-      preferred_skills: form.preferredSkills,
-      location: form.location,
-      work_mode: form.workMode,
-      experience: parseInt(form.experience || 0)
-    }
+    try {
+      const jobToSave = {
+        title: form.title,
+        company: form.company,
+        requiredSkills: form.requiredSkills,
+        experience: parseInt(form.experience || 0),
+        location: form.location,
+        work_mode: form.workMode,
+        description: form.description
+      }
 
-    const { error } = await supabase.from('jobs').insert([jobToSave])
-
-    if (error) {
+      await onSubmitJob(jobToSave)
+    } catch (error) {
       console.error('Error saving job:', error)
       alert('Failed to save job')
-      return
+    } finally {
+      setSubmitting(false)
     }
-
-    onSubmitJob(form)
   }
 
   return (
     <div className="page">
-      <h1>Employer Job Form</h1>
+      <div className="form-shell">
+        <div className="form-header">
+          <div>
+            <div className="hero-badge">Employer Job Posting</div>
+            <h1 className="form-title">Create a new job opportunity</h1>
+            <p className="form-subtitle">
+              Define the role, required skills, and work preferences so the platform can identify suitable candidates.
+            </p>
+          </div>
+        </div>
 
-      <form onSubmit={handleSubmit}>
-        <input name="company" placeholder="Company Name" onChange={handleChange} />
-        <input name="contact" placeholder="Contact Name" onChange={handleChange} />
-        <input name="email" placeholder="Contact Email" onChange={handleChange} />
-        <input name="title" placeholder="Job Title" onChange={handleChange} />
-        <textarea name="description" placeholder="Job Description" onChange={handleChange} />
-        <input name="requiredSkills" placeholder="Required Skills" onChange={handleChange} />
-        <input name="preferredSkills" placeholder="Preferred Skills" onChange={handleChange} />
-        <input name="location" placeholder="Location" onChange={handleChange} />
-        <input name="workMode" placeholder="Remote / Hybrid / Onsite" onChange={handleChange} />
-        <input name="experience" placeholder="Experience Level" onChange={handleChange} />
+        <form onSubmit={handleSubmit} className="profile-form">
+          <div className="form-section">
+            <h2>Role Details</h2>
 
-        <button type="submit">Submit Job</button>
-      </form>
+            <div className="form-grid">
+              <div>
+                <label>Job Title</label>
+                <input
+                  name="title"
+                  placeholder="Example: Frontend Developer"
+                  value={form.title}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-      <button className="secondary" onClick={goHome}>
-        Back Home
-      </button>
+              <div>
+                <label>Company Name</label>
+                <input
+                  name="company"
+                  placeholder="Example: Acme Corp"
+                  value={form.company}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="form-section">
+            <h2>Candidate Requirements</h2>
+
+            <div className="form-grid">
+              <div>
+                <label>Required Skills</label>
+                <input
+                  name="requiredSkills"
+                  placeholder="Example: React, JavaScript, Accessibility"
+                  value={form.requiredSkills}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <label>Minimum Experience (Years)</label>
+                <input
+                  name="experience"
+                  type="number"
+                  min="0"
+                  placeholder="Example: 3"
+                  value={form.experience}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <label>Location</label>
+                <input
+                  name="location"
+                  placeholder="Example: Dubai"
+                  value={form.location}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <label>Work Arrangement</label>
+                <input
+                  name="workMode"
+                  placeholder="Remote / Hybrid / Onsite"
+                  value={form.workMode}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="form-section">
+            <h2>Job Description</h2>
+
+            <label>Role Summary</label>
+            <textarea
+              name="description"
+              placeholder="Describe the role, responsibilities, and any other relevant details"
+              value={form.description}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="form-actions">
+            <button type="submit" className="primary" disabled={submitting}>
+              {submitting ? 'Submitting...' : 'Post Job'}
+            </button>
+
+            <button
+              type="button"
+              className="secondary"
+              onClick={goHome}
+              disabled={submitting}
+            >
+              Back Home
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   )
 }

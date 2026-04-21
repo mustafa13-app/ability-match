@@ -31,7 +31,8 @@ function CandidatePage({ goHome, onSubmitCandidate }) {
     if (!cvFile) return null
 
     const fileExt = cvFile.name.split('.').pop()
-    const fileName = `${Date.now()}-${form.name || 'candidate'}.${fileExt}`
+    const safeName = (form.name || 'candidate').replace(/\s+/g, '-').toLowerCase()
+    const fileName = `${Date.now()}-${safeName}.${fileExt}`
     const filePath = fileName
 
     const { error: uploadError } = await supabase.storage
@@ -45,7 +46,6 @@ function CandidatePage({ goHome, onSubmitCandidate }) {
     }
 
     const { data } = supabase.storage.from('cvs').getPublicUrl(filePath)
-
     return data.publicUrl
   }
 
@@ -78,71 +78,139 @@ function CandidatePage({ goHome, onSubmitCandidate }) {
 
   return (
     <div className="page">
-      <h1>Candidate Form</h1>
+      <div className="form-shell">
+        <div className="form-header">
+          <div>
+            <div className="hero-badge">Candidate Application</div>
+            <h1 className="form-title">Create your candidate profile</h1>
+            <p className="form-subtitle">
+              Share your background, skills, and CV so employers can assess your fit more effectively.
+            </p>
+          </div>
+        </div>
 
-      <form onSubmit={handleSubmit}>
-        <input
-          name="name"
-          placeholder="Full Name"
-          value={form.name}
-          onChange={handleChange}
-          required
-        />
-        <input
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          required
-        />
-        <input
-          name="skills"
-          placeholder="Skills (comma separated)"
-          value={form.skills}
-          onChange={handleChange}
-        />
-        <input
-          name="experience"
-          placeholder="Years of Experience"
-          value={form.experience}
-          onChange={handleChange}
-        />
-        <input
-          name="location"
-          placeholder="Location"
-          value={form.location}
-          onChange={handleChange}
-        />
-        <input
-          name="workMode"
-          placeholder="Remote / Hybrid / Onsite"
-          value={form.workMode}
-          onChange={handleChange}
-        />
-        <textarea
-          name="notes"
-          placeholder="Accessibility needs (optional)"
-          value={form.notes}
-          onChange={handleChange}
-        />
+        <form onSubmit={handleSubmit} className="profile-form">
+          <div className="form-section">
+            <h2>Basic Information</h2>
 
-        <label style={{ display: 'block', marginTop: '12px', marginBottom: '6px' }}>
-          Upload CV
-        </label>
-        <input
-          type="file"
-          accept=".pdf,.doc,.docx"
-          onChange={handleFileChange}
-        />
+            <div className="form-grid">
+              <div>
+                <label>Full Name</label>
+                <input
+                  name="name"
+                  placeholder="Enter your full name"
+                  value={form.name}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-        <button type="submit" disabled={submitting}>
-          {submitting ? 'Submitting...' : 'Submit'}
-        </button>
-      </form>
+              <div>
+                <label>Email Address</label>
+                <input
+                  name="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={form.email}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+          </div>
 
-      <button className="secondary" onClick={goHome} disabled={submitting}>
-        Back Home
-      </button>
+          <div className="form-section">
+            <h2>Professional Profile</h2>
+
+            <div className="form-grid">
+              <div>
+                <label>Skills</label>
+                <input
+                  name="skills"
+                  placeholder="Example: JavaScript, React, Testing"
+                  value={form.skills}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <label>Years of Experience</label>
+                <input
+                  name="experience"
+                  type="number"
+                  min="0"
+                  placeholder="Example: 5"
+                  value={form.experience}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <label>Location</label>
+                <input
+                  name="location"
+                  placeholder="Example: Dubai"
+                  value={form.location}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <label>Work Preference</label>
+                <input
+                  name="workMode"
+                  placeholder="Remote / Hybrid / Onsite"
+                  value={form.workMode}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="form-section">
+            <h2>Additional Information</h2>
+
+            <label>Accessibility Notes</label>
+            <textarea
+              name="notes"
+              placeholder="Share any accessibility requirements or additional context"
+              value={form.notes}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="form-section">
+            <h2>CV Upload</h2>
+            <p className="field-help">
+              Upload your CV in PDF, DOC, or DOCX format.
+            </p>
+
+            <div className="upload-box">
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx"
+                onChange={handleFileChange}
+              />
+              {cvFile && <p className="upload-file-name">Selected: {cvFile.name}</p>}
+            </div>
+          </div>
+
+          <div className="form-actions">
+            <button type="submit" className="primary" disabled={submitting}>
+              {submitting ? 'Submitting...' : 'Submit Profile'}
+            </button>
+
+            <button
+              type="button"
+              className="secondary"
+              onClick={goHome}
+              disabled={submitting}
+            >
+              Back Home
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   )
 }

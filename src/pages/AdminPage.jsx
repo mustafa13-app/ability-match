@@ -1,68 +1,100 @@
 function AdminPage({ goHome, candidates, jobs }) {
   return (
     <div className="page">
-      <h1>Admin</h1>
-
-      <h2>Candidates</h2>
-      {candidates.length === 0 && <p>No candidates yet</p>}
-
-      {candidates.map((c) => (
-        <div
-          key={c.id}
-          style={{
-            marginBottom: '20px',
-            padding: '10px',
-            background: '#fff',
-            borderRadius: '8px'
-          }}
-        >
-          <strong>{c.name}</strong>
-          <p>Email: {c.email}</p>
-          <p>Skills: {c.skills}</p>
-          <p>Experience: {c.experience}</p>
-          <p>Location: {c.location}</p>
-          <p>Work Mode: {c.work_mode}</p>
-          <p>Notes: {c.notes || 'None'}</p>
-
-          {c.cv_url && (
-            <p>
-              <a href={c.cv_url} target="_blank" rel="noopener noreferrer">
-                View CV
-              </a>
+      <div className="dashboard-shell">
+        <div className="dashboard-header">
+          <div>
+            <div className="hero-badge">Admin Dashboard</div>
+            <h1 className="dashboard-title">Candidate & Job Overview</h1>
+            <p className="dashboard-subtitle">
+              Review submitted candidates, uploaded CVs, and job opportunities in one place.
             </p>
-          )}
+          </div>
         </div>
-      ))}
 
-      <h2>Jobs</h2>
-      {jobs.length === 0 && <p>No jobs yet</p>}
+        <div className="dashboard-grid">
+          {/* Candidates */}
+          <div className="dashboard-card">
+            <div className="card-header">
+              <h2>Candidates</h2>
+              <span className="card-count">{candidates.length}</span>
+            </div>
 
-      {jobs.map((j) => (
-        <div
-          key={j.id}
-          style={{
-            marginBottom: '20px',
-            padding: '10px',
-            background: '#fff',
-            borderRadius: '8px'
-          }}
-        >
-          <strong>{j.title}</strong>
-          <p>Company: {j.company}</p>
-          <p>Skills: {j.requiredSkills || j.required_skills}</p>
-          <p>Location: {j.location}</p>
-          <p>Work Mode: {j.work_mode || j.workMode}</p>
-          <p>Experience: {j.experience}</p>
-          <p>Description: {j.description || 'None'}</p>
+            {candidates.length === 0 && (
+              <p className="empty-state">No candidates submitted yet</p>
+            )}
+
+            {candidates.map((c) => (
+              <div key={c.id} className="candidate-card">
+                <div className="candidate-top">
+                  <strong>{c.name}</strong>
+                  <span className="candidate-exp">{c.experience} yrs</span>
+                </div>
+
+                <p className="muted">{c.email}</p>
+
+                <div className="tag-row">
+                  {c.skills?.split(',').map((skill, i) => (
+                    <span key={i} className="tag">{skill.trim()}</span>
+                  ))}
+                </div>
+
+                <div className="candidate-meta">
+                  <span>{c.location}</span>
+                  <span>{c.work_mode}</span>
+                </div>
+
+                {c.cv_url && (
+                  <a
+                    href={c.cv_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="link"
+                  >
+                    View CV
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Jobs */}
+          <div className="dashboard-card">
+            <div className="card-header">
+              <h2>Jobs</h2>
+              <span className="card-count">{jobs.length}</span>
+            </div>
+
+            {jobs.length === 0 && (
+              <p className="empty-state">No jobs posted yet</p>
+            )}
+
+            {jobs.map((j) => (
+              <div key={j.id} className="job-card">
+                <strong>{j.title}</strong>
+                <p className="muted">{j.company}</p>
+
+                <div className="tag-row">
+                  {j.requiredSkills?.split(',').map((skill, i) => (
+                    <span key={i} className="tag">{skill.trim()}</span>
+                  ))}
+                </div>
+
+                <div className="candidate-meta">
+                  <span>{j.location}</span>
+                  <span>{j.work_mode}</span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      ))}
 
-      <br />
-      <br />
-
-      <button className="secondary" onClick={goHome}>
-        Back Home
-      </button>
+        <div className="dashboard-actions">
+          <button className="secondary" onClick={goHome}>
+            Back Home
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
