@@ -5,10 +5,13 @@ function EmployerPage({ goHome, onSubmitJob }) {
     title: '',
     company: '',
     requiredSkills: '',
+    preferredSkills: '',
     experience: '',
     location: '',
     workMode: '',
-    description: ''
+    description: '',
+    contact: '',
+    email: '',
   })
 
   const [submitting, setSubmitting] = useState(false)
@@ -16,7 +19,7 @@ function EmployerPage({ goHome, onSubmitJob }) {
   const handleChange = (e) => {
     setForm({
       ...form,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     })
   }
 
@@ -28,11 +31,14 @@ function EmployerPage({ goHome, onSubmitJob }) {
       const jobToSave = {
         title: form.title,
         company: form.company,
-        requiredSkills: form.requiredSkills,
-        experience: parseInt(form.experience || 0),
+        contact: form.contact,
+        email: form.email,
+        description: form.description,
+        required_skills: form.requiredSkills,
+        preferred_skills: form.preferredSkills,
         location: form.location,
         work_mode: form.workMode,
-        description: form.description
+        experience: parseInt(form.experience || 0, 10),
       }
 
       await onSubmitJob(jobToSave)
@@ -52,7 +58,7 @@ function EmployerPage({ goHome, onSubmitJob }) {
             <div className="hero-badge">Employer Job Posting</div>
             <h1 className="form-title">Create a new job opportunity</h1>
             <p className="form-subtitle">
-              Define the role, required skills, and work preferences so the platform can identify suitable candidates.
+              Define the role, required skills, and accessibility-friendly work preferences so the platform can identify suitable candidates.
             </p>
           </div>
         </div>
@@ -66,7 +72,7 @@ function EmployerPage({ goHome, onSubmitJob }) {
                 <label>Job Title</label>
                 <input
                   name="title"
-                  placeholder="Example: Frontend Developer"
+                  placeholder="Example: Corporate Lawyer"
                   value={form.title}
                   onChange={handleChange}
                   required
@@ -77,10 +83,37 @@ function EmployerPage({ goHome, onSubmitJob }) {
                 <label>Company Name</label>
                 <input
                   name="company"
-                  placeholder="Example: Acme Corp"
+                  placeholder="Example: Al Tamimi & Company"
                   value={form.company}
                   onChange={handleChange}
                   required
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="form-section">
+            <h2>Hiring Contact</h2>
+
+            <div className="form-grid">
+              <div>
+                <label>Contact Name</label>
+                <input
+                  name="contact"
+                  placeholder="Example: Fatima Al Suwaidi"
+                  value={form.contact}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <label>Contact Email</label>
+                <input
+                  name="email"
+                  type="email"
+                  placeholder="Example: hiring@company.com"
+                  value={form.email}
+                  onChange={handleChange}
                 />
               </div>
             </div>
@@ -94,8 +127,18 @@ function EmployerPage({ goHome, onSubmitJob }) {
                 <label>Required Skills</label>
                 <input
                   name="requiredSkills"
-                  placeholder="Example: React, JavaScript, Accessibility"
+                  placeholder="Example: Corporate Law, Contracts, M&A"
                   value={form.requiredSkills}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <label>Preferred Skills</label>
+                <input
+                  name="preferredSkills"
+                  placeholder="Example: Legal Research, Compliance"
+                  value={form.preferredSkills}
                   onChange={handleChange}
                 />
               </div>
@@ -106,7 +149,7 @@ function EmployerPage({ goHome, onSubmitJob }) {
                   name="experience"
                   type="number"
                   min="0"
-                  placeholder="Example: 3"
+                  placeholder="Example: 5"
                   value={form.experience}
                   onChange={handleChange}
                 />
@@ -140,7 +183,7 @@ function EmployerPage({ goHome, onSubmitJob }) {
             <label>Role Summary</label>
             <textarea
               name="description"
-              placeholder="Describe the role, responsibilities, and any other relevant details"
+              placeholder="Describe the role, responsibilities, legal focus, and any accessibility considerations"
               value={form.description}
               onChange={handleChange}
             />
