@@ -9,6 +9,9 @@ function CandidatePage({ goHome, onSubmitCandidate }) {
     experience: '',
     location: '',
     workMode: '',
+    workStyle: '',
+    workPace: '',
+    communication: '',
     notes: ''
   })
 
@@ -60,9 +63,12 @@ function CandidatePage({ goHome, onSubmitCandidate }) {
         name: form.name,
         email: form.email,
         skills: form.skills,
-        experience: parseInt(form.experience || 0),
+        experience: parseInt(form.experience || 0, 10),
         location: form.location,
         work_mode: form.workMode,
+        work_style: form.workStyle,
+        work_pace: form.workPace,
+        communication: form.communication,
         notes: form.notes,
         cv_url: cvUrl
       }
@@ -79,14 +85,23 @@ function CandidatePage({ goHome, onSubmitCandidate }) {
   return (
     <div className="page">
       <div className="form-shell">
-        <div className="form-header">
+        <div className="form-header form-header-row">
           <div>
             <div className="hero-badge">Candidate Application</div>
             <h1 className="form-title">Create your candidate profile</h1>
             <p className="form-subtitle">
-              Share your background, skills, and CV so employers can assess your fit more effectively.
+              Share your legal background, working preferences, and accessibility needs so employers can assess fit more effectively.
             </p>
           </div>
+
+          <button
+            type="button"
+            className="secondary top-back-btn"
+            onClick={goHome}
+            disabled={submitting}
+          >
+            Back Home
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="profile-form">
@@ -127,7 +142,7 @@ function CandidatePage({ goHome, onSubmitCandidate }) {
                 <label>Skills</label>
                 <input
                   name="skills"
-                  placeholder="Example: JavaScript, React, Testing"
+                  placeholder="Example: Corporate Law, Contracts, Legal Research"
                   value={form.skills}
                   onChange={handleChange}
                 />
@@ -168,12 +183,48 @@ function CandidatePage({ goHome, onSubmitCandidate }) {
           </div>
 
           <div className="form-section">
-            <h2>Additional Information</h2>
+            <h2>Work Style & Environment</h2>
+
+            <div className="form-grid">
+              <div>
+                <label>Work Style</label>
+                <input
+                  name="workStyle"
+                  placeholder="Research / Client-facing / Mixed"
+                  value={form.workStyle}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <label>Preferred Pace</label>
+                <input
+                  name="workPace"
+                  placeholder="Structured / Flexible / Fast-paced"
+                  value={form.workPace}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <label>Communication Preference</label>
+                <input
+                  name="communication"
+                  placeholder="Low / Moderate / High"
+                  value={form.communication}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="form-section">
+            <h2>Accessibility Information</h2>
 
             <label>Accessibility Notes</label>
             <textarea
               name="notes"
-              placeholder="Share any accessibility requirements or additional context"
+              placeholder="Share any accessibility requirements, accommodations, or working conditions that help you perform at your best"
               value={form.notes}
               onChange={handleChange}
             />
